@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from datetime import date, datetime, timedelta
 from PIL import Image, UnidentifiedImageError
 from typing import Dict, Tuple
-from flask import session
 from io import BytesIO
 import uuid
 import os
@@ -247,100 +246,3 @@ def request_entity_too_large(error):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", DEFAULT_PORT))
     app.run(host="0.0.0.0", port=port, debug=DEBUG)
-
-
-# from flask import Flask, render_template, request, send_file, flash, redirect, url_for
-# from datetime import date
-# from PIL import Image
-# import uuid
-# import os
-
-# ALLOWED_FORMATS = ["JPEG", "PNG", "WEBP"]
-# DEFAULT_QUALITY = 40
-# DEBUG = True
-# DEFUALT_PORT = 5000
-
-# app = Flask(__name__)
-# app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
-
-# # --- Web page with form ---
-# @app.route("/")
-# def index():
-#     return render_template("index.html", current_year=date.today().year, result=None, allowed_formats=ALLOWED_FORMATS)
-
-# # --- Image compression route ---
-# @app.route("/", methods=["POST"])
-# def compress_image():
-#     if "file" not in request.files:
-#         flash("No file part")
-#         return redirect(url_for("index"))
-
-#     file = request.files["file"]
-#     if file.filename == "":
-#         flash("No selected file")
-#         return redirect(url_for("index"))
-
-#     # Get user options
-#     out_format = request.form.get("format", "JPEG").upper()
-#     if out_format not in ALLOWED_FORMATS:
-#         flash("Unsupported format selected")
-#         return redirect(url_for("index"))
-
-#     try:
-#         quality = int(request.form.get("quality", DEFAULT_QUALITY))
-#         quality = max(1, min(quality, 100))  # clamp
-#     except ValueError:
-#         quality = DEFAULT_QUALITY
-
-#     try:
-#         # Original size
-#         file.stream.seek(0, os.SEEK_END)
-#         orig_size_kb = file.stream.tell() / 1024
-#         file.stream.seek(0)
-
-#         # Open image
-#         img = Image.open(file.stream)
-#         if img.mode in ("RGBA", "P") and out_format != "PNG":
-#             img = img.convert("RGB")
-
-#         # Compress and save to temp file
-#         tmp_filename = f"temp_images/temp_{uuid.uuid4().hex}.{out_format.lower()}"
-#         save_kwargs = {"format": out_format}
-#         if out_format in ("JPEG", "WEBP"):
-#             save_kwargs["quality"] = quality
-#             save_kwargs["optimize"] = True
-#         img.save(tmp_filename, **save_kwargs)
-
-#         compressed_size_kb = os.path.getsize(tmp_filename) / 1024
-#         compression_percent = 100 * (orig_size_kb - compressed_size_kb) / orig_size_kb
-
-#         return render_template(
-#             "index.html",
-#             current_year=date.today().year,
-#             result={
-#                 "original_kb": round(orig_size_kb, 2),
-#                 "compressed_kb": round(compressed_size_kb, 2),
-#                 "percent": round(compression_percent, 2),
-#                 "format": out_format,
-#                 "quality": quality,
-#                 "filename": tmp_filename
-#             },
-#             allowed_formats=ALLOWED_FORMATS
-#         )
-#     except Exception as e:
-#         flash(f"Error processing image: {e}")
-#         return redirect(url_for("index"))
-
-# # --- Download route ---
-# @app.route("/download/<tmp_file>")
-# def download_image(tmp_file):
-#     # Make sure the path is safe
-#     if not os.path.exists(tmp_file):
-#         flash("File not found")
-#         return redirect(url_for("index"))
-    
-#     return send_file(tmp_file, as_attachment=True, download_name=f"compressed.{tmp_file.split('.')[-1]}")
-
-# if __name__ == "__main__":
-#     port = int(os.environ.get("PORT", DEFUALT_PORT))
-#     app.run(host="0.0.0.0", port=port, debug=DEBUG)
