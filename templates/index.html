@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Compressor</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-200 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white m-4 rounded-md" id="MainHeader">
+    <div class="mx-auto flex h-16 max-w-screen-xl items-center gap-8 px-4 sm:px-6 lg:px-8">
+      <a class="block text-blue-500" href="/">
+        <span class="sr-only">Home</span>
+        <img src="{{ url_for('static', filename='favicon.png') }}" alt="Website Logo" class="h-12">
+    </a>
+    <h2 class="text-xl font-bold text-center">Image Compressor</h2>
+      <div class="flex flex-1 items-center justify-end md:justify-between">
+        <nav aria-label="Global" class="hidden md:block">
+          <ul class="flex items-center gap-6 text-sm">
+            <li><a class="text-gray-500 hover:text-gray-700" href="https://mehranbazrafkan.github.io/">About</a></li>
+            <li><a class="text-gray-500 hover:text-gray-700" href="https://github.com/MehranBazrafkan">Github</a></li>
+            <li><a class="text-gray-500 hover:text-gray-700" href="https://github.com/MehranBazrafkan?tab=repositories">Projects</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Flash messages -->
+  <div class="max-w-lg mx-auto w-full px-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="my-2 px-4 py-2 rounded text-sm
+                      {% if category == 'error' %} bg-red-100 text-red-700
+                      {% elif category == 'success' %} bg-green-100 text-green-700
+                      {% else %} bg-blue-100 text-blue-700 {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main content -->
+  <main class="flex-grow flex flex-col items-center justify-center">
+    <!-- <div class="bg-white rounded-lg p-8 w-full max-w-lg shadow">
+      <h2 class="text-xl font-bold text-center">Image Compressor</h2>
+    </div> -->
+
+    <!-- Upload Form -->
+    <div class="bg-white rounded-lg p-8 my-4 w-full max-w-lg shadow">
+      <form action="{{ url_for('compress_image') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        
+        <label class="block">
+          <span class="text-gray-700">Upload Image</span>
+          <input type="file" name="file" accept="image/*"
+                 class="mt-2 block w-full text-sm text-gray-500 border border-blue-500 rounded-md p-2" required>
+        </label>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block">
+            <span class="text-gray-700">Output Format</span>
+            <select name="format"
+                    class="mt-2 block w-full text-sm text-gray-700 border border-blue-500 p-2 rounded-md">
+              {% for fmt in allowed_formats %}
+                <option value="{{ fmt }}">{{ fmt }}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-gray-700">Quality (1-100)</span>
+            <input type="number" name="quality" value="40" min="5" max="100" step="5"
+                   class="mt-2 block w-full text-sm text-gray-700 border border-blue-500 p-2 rounded-md">
+          </label>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">
+          Compress Image
+        </button>
+      </form>
+
+      {% if result %}
+        <div class="mt-6 p-4 bg-gray-50 rounded-md text-sm">
+          <p><strong>Original Size:</strong> {{ result.original_kb }} KB</p>
+          <p><strong>Compressed Size:</strong> {{ result.compressed_kb }} KB</p>
+          <p><strong>Compression:</strong> {{ result.percent }}%</p>
+          <p><strong>Format:</strong> {{ result.format }}, Quality: {{ result.quality }}</p>
+
+          <a href="{{ url_for('download_image', download_id=result.download_id) }}"
+             class="mt-3 inline-block bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">
+            Download {{ result.filename }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white m-4 rounded-md text-center py-6">
+    <p class="text-gray-500 text-sm">&copy; {{ current_year }} <a class="text-gray-700 hover:text-gray-950" href="https://mehranbazrafkan.github.io/">Mehran Bazrafkan</a>. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
